@@ -1,3 +1,4 @@
+package com.onemax;
 
 public class Time {
 

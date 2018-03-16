@@ -1,7 +1,6 @@
-
+package com.onemax;
 public class OneMax {
-
-	public static void main(String[] args) {
+	public static void getOneMax()  {
 		// TODO Auto-generated method stub
 
 		int pow = 30;
