@@ -1,6 +1,6 @@
 package com.onemax;
 
-public class SimulateAneal extends HillClimbing {
+public class SimulateAneal extends BaseAlgorithm {
 
 	static double temperature = 100.0;       // 初始温度
     static double coolingRate = 0.99;        // 下降速率
