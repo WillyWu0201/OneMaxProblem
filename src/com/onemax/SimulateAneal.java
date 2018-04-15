@@ -7,18 +7,18 @@ public class SimulateAneal extends HillClimbing {
     static double absolutetemperature = 0.00;// 凝固温度
     
     public static void startSimulateAneal() {
-		HillClimbingObject object = initial();
+    	AlgorithmObject object = initial();
 		getSimulateAneal(object);
 	}
 	
-	private static void getSimulateAneal(HillClimbingObject object) {
+	private static void getSimulateAneal(AlgorithmObject object) {
 		iterate++;
-		HillClimbingObject rand = getRandomNeighbor(object);
+		AlgorithmObject rand = AlgorithmObject.getRandomNeighbor(object);
 		if(rand.bitCount > object.bitCount) {
 			object.bitCount = rand.bitCount;
 			object.bitValue = rand.bitValue;
 		} else {
-			int detal = object.bitCount - rand.bitCount;
+			int detal = rand.bitCount - object.bitCount;
 			if( Math.exp(detal / temperature) > Math.random() ) {
 				object.bitCount = rand.bitCount;
 				object.bitValue = rand.bitValue;
