@@ -1,5 +1,5 @@
 # One Max Problem
--
+
 Use different algorithms to solve the one max problem and get the best score.<br>
 The best score is mean that we get the most '1' in a binary array.
 

@@ -1,1 +1,0 @@
-iterate time = 401 bitCount = 100
