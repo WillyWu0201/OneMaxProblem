@@ -28,13 +28,21 @@ public class GeneticAlgorithm extends BaseAlgorithm {
     // 新的群體（子代） 
     private static int[][] childPopulation;
     // 群體規模
-    private static int scale = 4;
+    private static int scale = 20;
     // 最大演化次數
-    private static int maxGeneration = 4;
+    private static int maxGeneration = 500;
     // 群體的適應度
     private static int[] fitness;
     // 群體的總適應度
     private static int sumFitness;
+    // 最佳的染色體
+    private static int[] bestChromosome;
+    // 最佳的價值
+    private static int bestValue;
+    // 最佳的重量
+    private static int bestWeight;
+    // 最佳的染色體的世代
+    private static int bestGeneration;
     // 基因演算法選擇的方式
     private static GeneticSelection selection;
     // 群體中每個個體的機率(輪盤法)
@@ -55,73 +63,103 @@ public class GeneticAlgorithm extends BaseAlgorithm {
 //    4. mutation
     
     public static void init() {
-    	// 初始化參數
-    	initialParameter();
-    	// 初始化群體
-    	initialPopulation();
-    	System.out.println("====start=====");
-		for (int k = 0; k < scale; k++) {
-			for (int i = 0; i < chromosomeLength; i++) {
-				System.out.print(parentPopulation[k][i] + ",");
-			}
-			System.out.println();
-			System.out.println("---" + fitness[k] + " " + wheelProbability[k]);
-		}
-    	while(iterate < maxGeneration) {
-    		iterate++;
-    		// 計算適應度
-        	calculateFitness();
-        	// 開始演化
-        	startEvaluate();
-    	}
-    	System.out.println("====end=====");
-		for (int k = 0; k < scale; k++) {
-			for (int i = 0; i < chromosomeLength; i++) {
-				System.out.print(parentPopulation[k][i] + ",");
-			}
-			System.out.println();
-			System.out.println("---" + fitness[k] + " " + wheelProbability[k]);
-		}
+    		// 初始化參數
+    		initialParameter();
+    		// 初始化群體
+    		initialPopulation();
+//    		System.out.println("====start=====");
+//		for (int k = 0; k < scale; k++) {
+//			for (int i = 0; i < chromosomeLength; i++) {
+//				System.out.print(parentPopulation[k][i] + ",");
+//			}
+//			System.out.println();
+//			System.out.println("---" + fitness[k] + " " + wheelProbability[k]);
+//		}
+    		while(iterate < maxGeneration) {
+    			iterate++;
+    			// 計算適應度
+    			calculateFitness();
+    			// 開始演化
+    			startEvaluate();
+    		}
+//    		System.out.println("====end=====");
+//		for (int k = 0; k < scale; k++) {
+//			for (int i = 0; i < chromosomeLength; i++) {
+//				System.out.print(parentPopulation[k][i] + ",");
+//			}
+//			System.out.println();
+//			System.out.println("---" + fitness[k] + " " + wheelProbability[k]);
+//		}
+//		System.out.println("====Best=====");
+//		for (int i = 0; i < chromosomeLength; i++) {
+//			System.out.print(bestChromosome[i] + ",");
+//		}
+//		System.out.println();
+//		System.out.println("---" + bestGeneration + " " + bestValue);
     }
     
     private static void initialParameter() {
-    	parentPopulation = new int[scale][chromosomeLength];  
-    	childPopulation = new int[scale][chromosomeLength]; 
-    	fitness = new int[scale];
-    	wheelProbability = new float[scale];
-    	selection = GeneticSelection.WHEEL;
-    	random = new Random(System.currentTimeMillis());
+	    	parentPopulation = new int[scale][chromosomeLength];  
+	    	childPopulation = new int[scale][chromosomeLength]; 
+	    	bestChromosome = new int[chromosomeLength]; 
+	    	fitness = new int[scale];
+	    	wheelProbability = new float[scale];
+	    	selection = GeneticSelection.WHEEL;
+	    	random = new Random(System.currentTimeMillis());
     }
     
     private static void initialPopulation() {
-    	for (int i = 0; i < scale; i++) {
-    		for(int j = 0; j < chromosomeLength; j++) {
-    			parentPopulation[i][j] = random.nextInt(2);
-    		}
-    	}
+	    	for (int i = 0; i < scale; i++) {
+	    		for(int j = 0; j < chromosomeLength; j++) {
+	    			parentPopulation[i][j] = random.nextInt(2);
+	    		}
+	    	}
     }
     
     private static void calculateFitness() {
-    	for(int i = 0; i < scale; i++) {
-    		int value = 0;
-        	int weight = 0;
-        	for(int j = 0; j < chromosomeLength; j++) {
-        		if (parentPopulation[i][j] == 1) {
-        			value += objectValue[j];
-        			weight += objectWeight[j];
-        		}
-        	}
-    		fitness[i] = (weight > bagCapacity) ? 0 : value;
-//    		System.out.println("fitness = " + fitness[i]);
-    	}
+    		int index = 0, maxValue = 0, maxWeight = 0;
+	    	for (int i = 0; i < scale; i++) {
+	    		int value = 0;
+	        	int weight = 0;
+	        	for (int j = 0; j < chromosomeLength; j++) {
+	        		if (parentPopulation[i][j] == 1) {
+	        			value += objectValue[j];
+	        			weight += objectWeight[j];
+	        		}
+	        	}
+	        	if (weight > bagCapacity) {
+	        		fitness[i] = 1;
+	        	} else {
+	        		fitness[i] = value;
+	        		if (value > maxValue) {
+		        		maxValue = value;
+		        		maxWeight = weight;
+		        		index = i;
+		        	}
+	        	}
+//	    		System.out.println("fitness = " + fitness[i]);
+	    	}
+	    	calculateBestGenetic(index, maxValue, maxWeight);
+    }
+    
+    private static void calculateBestGenetic(int index, int value, int weight) {
+    		if (value > bestValue) {
+    			bestValue = value;
+    			bestWeight = weight;
+    			bestGeneration = iterate;
+    			for (int i = 0; i < chromosomeLength; i++) {
+    				bestChromosome[i] = parentPopulation[index][i];
+    			}
+    		}
+    		System.out.println("iterate = "+ iterate + ", bestValue = " + bestValue + ", bestWeight = " + bestWeight);
     }
     
     private static void startEvaluate() {
-    	switch(selection) {
-		case WHEEL:
-			wheelSelection();
-		case TOURNAMENT:
-			tournamentSelection();
+	    	switch(selection) {
+			case WHEEL:
+				wheelSelection();
+			case TOURNAMENT:
+				tournamentSelection();
 		}
 		calculateCrossover();
 		calculateMutation();
@@ -129,28 +167,28 @@ public class GeneticAlgorithm extends BaseAlgorithm {
     }
     
     private static void wheelSelection() {
-    	// calculate rate
-    	calculateWheelProbability();
-    	// selection
-    	selection();
+	    	// calculate rate
+	    	calculateWheelProbability();
+	    	// selection
+	    	selection();
     }
     
     private static void calculateWheelProbability() {
-    	int[] tempP = new int[scale];
-    	double sum = 0;
-    	sumFitness = 0;
-    	for (int i = 0; i < scale; i++) {
-    		tempP[i] = fitness[i];
-    		sumFitness += tempP[i];
+	    	int[] tempP = new int[scale];
+	    	double sum = 0;
+	    	sumFitness = 0;
+	    	for (int i = 0; i < scale; i++) {
+	    		tempP[i] = fitness[i];
+	    		sumFitness += tempP[i];
 		}
-    	sum = sumFitness;
-    	for (int i = 0; i < scale; i++) {
-    		if (i == 0) {
-    			wheelProbability[i] = (float) (tempP[0] / sum);
-    		} else {
-    			wheelProbability[i] = (float) (tempP[i] / sum + wheelProbability[i - 1]);
-    		}
-//    		System.out.println("wheelProbability = " + wheelProbability[i]);
+	    	sum = sumFitness;
+	    	for (int i = 0; i < scale; i++) {
+	    		if (i == 0) {
+	    			wheelProbability[i] = (float) (tempP[0] / sum);
+	    		} else {
+	    			wheelProbability[i] = (float) (tempP[i] / sum + wheelProbability[i - 1]);
+	    		}
+//	    		System.out.println("wheelProbability = " + wheelProbability[i]);
 		}
     }
     
@@ -159,16 +197,16 @@ public class GeneticAlgorithm extends BaseAlgorithm {
     }
     
     private static void selection() {
-    	switch(selection) {
-			case WHEEL:
-				selectPopulation();
-			case TOURNAMENT:
-				break;
-    	}
+	    	switch(selection) {
+				case WHEEL:
+					selectPopulation();
+				case TOURNAMENT:
+					break;
+	    	}
     }
     
     private static void selectPopulation() {
-    	float rand;
+	    	float rand;
 		int index;
 		for (int i = 0; i < scale; i++) {
 			rand = (float) (random.nextFloat());
@@ -182,76 +220,65 @@ public class GeneticAlgorithm extends BaseAlgorithm {
     }
     
     private static void copyChromosome(int newIndex, int oldIndex) {
-    	for (int i = 0; i < chromosomeLength; i++) {
-//    		System.out.println("newIndex = " + newIndex + ", oldIndex = " + oldIndex + ", i = " + i);
+	    	for (int i = 0; i < chromosomeLength; i++) {
 			childPopulation[newIndex][i] = parentPopulation[oldIndex][i];
 		}
     }
     
     private static void calculateCrossover() {
-    	float rand;
-    	// 交叉方式交配(1,3)(2,4)
-    	for (int i = 0; i < scale; i += 2) {
-    		rand = random.nextFloat();
-    		if (rand < corssoverRate) {
-    			crossover(i, i + 1);
-    		}
-    	}
+	    	float rand;
+	    	// 交叉方式交配(1,3)(2,4)
+	    	for (int i = 0; i < scale; i += 2) {
+	    		rand = random.nextFloat();
+	    		if (rand < corssoverRate) {
+	    			crossover(i, i + 1);
+	    		}
+	    	}
     }
     
     private static void crossover(int k1, int k2) {
-    	int i, j, flag;
-    	int rand1, rand2, temp;
-    	rand1 = random.nextInt(chromosomeLength);
-    	rand2 = random.nextInt(chromosomeLength);
-		while (rand1 == rand2) {
-			rand2 = random.nextInt(chromosomeLength);
-		}
-		// 確保rand1 < rand2
-		if (rand1 > rand2) {
-			temp = rand1;
-			rand1 = rand2;
-			rand2 = temp;
-		}
-		flag = rand2 - rand1 + 1; // 把染色體切成兩份的index
-		for (i = 0, j = rand1; i < flag; i++, j++) {
-			temp = childPopulation[k1][j];
-			childPopulation[k1][j] = childPopulation[k2][j];
-			childPopulation[k2][j] = temp;
+    		int temp;
+		int flag = random.nextInt(chromosomeLength);
+//		System.out.println(k1 + "," + k2 + " crossover flag = " + flag);
+		for(int i = flag; i < chromosomeLength; i++) {
+			temp = childPopulation[k1][i];
+			childPopulation[k1][i] = childPopulation[k2][i];
+			childPopulation[k2][i] = temp;
 		}
     }
     
     private static void calculateMutation() {
-    	float rand;
-    	// 交叉方式交配(1,3)(2,4)
-    	for (int i = 0; i < scale; i += 2) {
-    		rand = random.nextFloat();
-    		if (rand < mutaionRate) {
-    			mutation(i);
+    		float rand;
+    		// 交叉方式交配(1,3)(2,4)
+    		for (int i = 0; i < scale; i ++) {
+    			rand = random.nextFloat();
+    			if (rand < mutaionRate) {
+    				mutation(i);
+    			}
     		}
-    	}
     }
     
     private static void mutation(int k1) {
-    	int rand = random.nextInt(chromosomeLength);
-    	childPopulation[k1][rand] ^= childPopulation[k1][rand];
+	    	int rand = random.nextInt(chromosomeLength);
+//	    	System.out.println(k1 + " mutation flag = " + rand);
+	    	int mu = childPopulation[k1][rand] == 0 ? 1 : 0;
+	    	childPopulation[k1][rand] = mu;
     }
     
     private static void chagePopulation() {
-    	// 將新群體複製到就群體中，繼續下一次的演化
-    	for (int i = 0; i < scale; i++) {
-    		for (int j = 0; j < chromosomeLength; j++) {
-    			parentPopulation[i][j] = childPopulation[i][j];
-    		}
-    	}
-    	
-    	System.out.println("=========");
-		for (int k = 0; k < scale; k++) {
-			for (int i = 0; i < chromosomeLength; i++) {
-				System.out.print(parentPopulation[k][i] + ",");
-			}
-			System.out.println();
-			System.out.println("---" + fitness[k] + " " + wheelProbability[k]);
-		}
+	    	// 將新群體複製到就群體中，繼續下一次的演化
+	    	for (int i = 0; i < scale; i++) {
+	    		for (int j = 0; j < chromosomeLength; j++) {
+	    			parentPopulation[i][j] = childPopulation[i][j];
+	    		}
+	    	}
+//	    	System.out.println("====" + iterate + "====");
+//		for (int k = 0; k < scale; k++) {
+//			for (int i = 0; i < chromosomeLength; i++) {
+//				System.out.print(parentPopulation[k][i] + ",");
+//			}
+//			System.out.println();
+//			System.out.println("---" + fitness[k] + " " + wheelProbability[k]);
+//		}
     }
 }
