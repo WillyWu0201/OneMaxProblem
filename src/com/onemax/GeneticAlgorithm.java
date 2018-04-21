@@ -41,8 +41,6 @@ public class GeneticAlgorithm extends BaseAlgorithm {
     private static int bestValue;
     // 最佳的重量
     private static int bestWeight;
-    // 最佳的染色體的世代
-    private static int bestGeneration;
     // 基因演算法選擇的方式
     private static GeneticSelection selection;
     // 群體中每個個體的機率(輪盤法)
@@ -56,7 +54,6 @@ public class GeneticAlgorithm extends BaseAlgorithm {
     // 隨機
     private static Random random;
    
-    
 //    1. 適應度(fitness) -> 看看會不會過重，只保留不會超重的，這邊就會知道總重和價值
 //    2. selection -> 用 wheel selection 和 tournament selection去算（所以最後可以畫出兩條線）
 //    3. crossover
@@ -104,7 +101,7 @@ public class GeneticAlgorithm extends BaseAlgorithm {
 	    	bestChromosome = new int[chromosomeLength]; 
 	    	fitness = new int[scale];
 	    	wheelProbability = new float[scale];
-	    	selection = GeneticSelection.WHEEL;
+	    	selection = GeneticSelection.TOURNAMENT;
 	    	random = new Random(System.currentTimeMillis());
     }
     
@@ -146,7 +143,6 @@ public class GeneticAlgorithm extends BaseAlgorithm {
     		if (value > bestValue) {
     			bestValue = value;
     			bestWeight = weight;
-    			bestGeneration = iterate;
     			for (int i = 0; i < chromosomeLength; i++) {
     				bestChromosome[i] = parentPopulation[index][i];
     			}
@@ -159,7 +155,7 @@ public class GeneticAlgorithm extends BaseAlgorithm {
 			case WHEEL:
 				wheelSelection();
 			case TOURNAMENT:
-				tournamentSelection();
+				selection();
 		}
 		calculateCrossover();
 		calculateMutation();
@@ -192,20 +188,16 @@ public class GeneticAlgorithm extends BaseAlgorithm {
 		}
     }
     
-    private static void tournamentSelection() {
-    	
-    }
-    
     private static void selection() {
 	    	switch(selection) {
 				case WHEEL:
-					selectPopulation();
+					selectWheelPopulation();
 				case TOURNAMENT:
-					break;
+					selectTournamentPopulation();
 	    	}
     }
     
-    private static void selectPopulation() {
+    private static void selectWheelPopulation() {
 	    	float rand;
 		int index;
 		for (int i = 0; i < scale; i++) {
@@ -218,6 +210,16 @@ public class GeneticAlgorithm extends BaseAlgorithm {
 			copyChromosome(i, index);
 		}
     }
+    
+    private static void selectTournamentPopulation() {
+    	int rand1, rand2;
+	for (int i = 0; i < scale; i++) {
+		rand1 = random.nextInt(scale);
+		rand2 = random.nextInt(scale);
+		int index = fitness[rand1] > fitness[rand2] ? rand1 : rand2;
+		copyChromosome(i, index);
+	}
+}
     
     private static void copyChromosome(int newIndex, int oldIndex) {
 	    	for (int i = 0; i < chromosomeLength; i++) {
