@@ -15,3 +15,10 @@ Random a number, search neighbor who has the best score than self for next itera
 Like Hill Climbing Algorithm basically, the difference is the algorithm has some probability to choose worse neighbor until to get the best score.
 
 ### Genetic Algorithm
+
+#### Knapsack Problem
+
+
+### Ant Colony Optimization
+
+#### Travelling Salesman Problem
