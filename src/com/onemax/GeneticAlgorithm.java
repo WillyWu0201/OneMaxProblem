@@ -65,6 +65,7 @@ public class GeneticAlgorithm extends BaseAlgorithm {
 
 	public static void init() {
 		int count = 0;
+		Time time = new Time();
 		while (count < repeatCount) {
 			// 初始化參數
 			initialParameter();
@@ -82,7 +83,8 @@ public class GeneticAlgorithm extends BaseAlgorithm {
 			bestValue = 0;
 			count++;
 		}
-
+		long spendTime = time.end();
+		System.out.println("WHEEL spend time = " + spendTime + "ms");
 		try {
 			writeToCSVFile();
 		} catch (FileNotFoundException e) {
